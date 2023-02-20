@@ -14,9 +14,10 @@ import sqlite
 
 
 class EmailsenderApp(App):
-    sqlite.db_connect()
+
 
     def sqlite(self):
+        sqlite.db_connect()
         profiles = sqlite.get_profiles()
         try:
             self.FROM_E_MAIL = profiles[1]
@@ -30,9 +31,12 @@ class EmailsenderApp(App):
             self.SUBJECT = None
 
     def create_new_profile(sefl, FROM_E_MAIL, PASS, TO_E_MAIL, SUBJECT):
+        sqlite.db_connect()
         sqlite.create_new_profile(FROM_E_MAIL, PASS, TO_E_MAIL, SUBJECT)
 
     def build(self):
+        self.sqlite()
+
         self.sm = ScreenManager()
         screen1 = Screen(name="main")
         screen2 = Screen(name="settings")
@@ -98,10 +102,10 @@ class EmailsenderApp(App):
         gl4.add_widget(self.subject)
         bl_settings.add_widget(gl4)
         bl_settings.add_widget(Button(text='Сохранить',
-                                      on_press=self.create_new_profile(self.from_email,
-                                                                       self.password,
-                                                                       self.to_email,
-                                                                       self.subject)))
+                                      on_press=self.create_new_profile(self.from_email.text,
+                                                                       self.password.text,
+                                                                       self.to_email.text,
+                                                                       self.subject.text)))
         bl_settings.add_widget(Button(text='Назад',
                                       on_press=self.to_main))
 

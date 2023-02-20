@@ -15,11 +15,11 @@ def db_connect() -> None:
 
 
 def get_profiles() -> list:
-    products = cur.execute("SELECT * FROM profiles").fetchall()
-    return products
+    profiles = cur.execute("SELECT * FROM profiles").fetchone()
+    return profiles
 
 
-def create_new_profile(from_email, password, to_email, subject) -> sqlite3.Cursor:
+def create_new_profile(from_email: str, password: str, to_email: str, subject: str) -> sqlite3.Cursor:
     new_profile = cur.execute("INSERT INTO profiles (from_email, password, to_email, subject) VALUES (?, ?, ?, ?)",
                               (from_email,
                                password,
