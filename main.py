@@ -15,28 +15,8 @@ import sqlite
 
 class EmailsenderApp(App):
 
-
-    def sqlite(self):
-        sqlite.db_connect()
-        profiles = sqlite.get_profiles()
-        try:
-            self.FROM_E_MAIL = profiles[1]
-            self.PASS = profiles[2]
-            self.TO_E_MAIL = profiles[3]
-            self.SUBJECT = profiles[4]
-        except:
-            self.FROM_E_MAIL = None
-            self.PASS = None
-            self.TO_E_MAIL = None
-            self.SUBJECT = None
-
-    def create_new_profile(sefl, FROM_E_MAIL, PASS, TO_E_MAIL, SUBJECT):
-        sqlite.db_connect()
-        sqlite.create_new_profile(FROM_E_MAIL, PASS, TO_E_MAIL, SUBJECT)
-
     def build(self):
-        self.sqlite()
-
+        sqlite.db_connect()
         self.sm = ScreenManager()
         screen1 = Screen(name="main")
         screen2 = Screen(name="settings")
@@ -102,10 +82,7 @@ class EmailsenderApp(App):
         gl4.add_widget(self.subject)
         bl_settings.add_widget(gl4)
         bl_settings.add_widget(Button(text='Сохранить',
-                                      on_press=self.create_new_profile(self.from_email.text,
-                                                                       self.password.text,
-                                                                       self.to_email.text,
-                                                                       self.subject.text)))
+                                      on_press=sqlite.create_new_profile))
         bl_settings.add_widget(Button(text='Назад',
                                       on_press=self.to_main))
 
@@ -153,9 +130,20 @@ class EmailsenderApp(App):
     def bl_set_error(self, instance):
         self.sm.current = 'set_error'
 
+    def create_new_profile(self):
+        sqlite.db_connect()
+        sqlite.create_new_profile(self.from_email.text, self.password.text, self.to_email.text, self.subject.text)
+
     def send_e_mail(self, instance):
-        self.sqlite()
-        if self.FROM_E_MAIL and self.TO_E_MAIL and self.PASS and self.SUBJECT:
+        profiles = sqlite.get_profiles()
+        if profiles[1]:
+            try:
+                self.FROM_E_MAIL = profiles[1]
+                self.PASS = profiles[2]
+                self.TO_E_MAIL = profiles[3]
+                self.SUBJECT = profiles[4]
+            except:
+                pass
             if self.date.text and self.hot_water and self.cold_water:
                 mgs = MIMEMultipart()
                 mgs['From'] = self.FROM_E_MAIL
