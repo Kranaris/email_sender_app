@@ -27,6 +27,7 @@ class EmailsenderApp(App):
         screen2 = Screen(name="settings")
         screen3 = Screen(name="done")
         screen4 = Screen(name="data")
+        screen5 = Screen(name="set_error")
 
         bl_main = BoxLayout(orientation='vertical',
                             padding=[25, 20],
@@ -95,15 +96,22 @@ class EmailsenderApp(App):
         bl_data.add_widget(Button(text='ОК',
                                   on_press=self.to_main))
 
+        bl_set_error = BoxLayout(orientation='vertical')
+        bl_set_error.add_widget(Label(text='Сначала заполните контактные данные в меню "настройки"!'))
+        bl_set_error.add_widget(Button(text='ОК',
+                                  on_press=self.to_settings))
+
         screen1.add_widget(bl_main)
         screen2.add_widget(bl_settings)
         screen3.add_widget(bl_done)
         screen4.add_widget(bl_data)
+        screen5.add_widget(bl_set_error)
 
         self.sm.add_widget(screen1)
         self.sm.add_widget(screen2)
         self.sm.add_widget(screen3)
         self.sm.add_widget(screen4)
+        self.sm.add_widget(screen5)
         self.sm.current = 'main'
         return self.sm
 
@@ -118,6 +126,9 @@ class EmailsenderApp(App):
 
     def to_data(self, instance):
         self.sm.current = 'data'
+
+    def bl_set_error(self, instance):
+        self.sm.current = 'set_error'
 
     def send_e_mail(self, instance):
         if FROM_E_MAIL and TO_E_MAIL and PASS and SUBJECT:
@@ -141,7 +152,7 @@ class EmailsenderApp(App):
             else:
                 self.to_data(instance)
         else:
-            print('Введите данные в настройках')
+            self.bl_set_error(instance)
 
 
 if __name__ == "__main__":
