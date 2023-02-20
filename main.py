@@ -21,6 +21,7 @@ SUBJECT = config.profile.SUBJECT
 
 
 class EmailsenderApp(App):
+
     def build(self):
         self.sm = ScreenManager()
         screen1 = Screen(name="main")
@@ -65,22 +66,26 @@ class EmailsenderApp(App):
         gl1 = GridLayout(cols=2,
                          padding=[25, 20])
         gl1.add_widget(Label(text='Твой email'))
-        gl1.add_widget(TextInput())
+        self.from_email = (TextInput())
+        gl1.add_widget(self.from_email)
         bl_settings.add_widget(gl1)
         gl2 = GridLayout(cols=2,
                          padding=[25, 20])
         gl2.add_widget(Label(text='Твой пароль'))
-        gl2.add_widget(TextInput(password=True))
+        self.password = TextInput(password=True)
+        gl2.add_widget(self.password)
         bl_settings.add_widget(gl2)
         gl3 = GridLayout(cols=2,
                          padding=[25, 20])
         gl3.add_widget(Label(text='Email для отправления'))
-        gl3.add_widget(TextInput())
+        self.to_email = TextInput()
+        gl3.add_widget(self.to_email)
         bl_settings.add_widget(gl3)
         gl4 = GridLayout(cols=2,
                          padding=[25, 20])
         gl4.add_widget(Label(text='Тема письма'))
-        gl4.add_widget(TextInput())
+        self.subject = TextInput()
+        gl4.add_widget(self.subject)
         bl_settings.add_widget(gl4)
         bl_settings.add_widget(Button(text='Сохранить'))
         bl_settings.add_widget(Button(text='Назад',
@@ -99,7 +104,7 @@ class EmailsenderApp(App):
         bl_set_error = BoxLayout(orientation='vertical')
         bl_set_error.add_widget(Label(text='Сначала заполните контактные данные в меню "настройки"!'))
         bl_set_error.add_widget(Button(text='ОК',
-                                  on_press=self.to_settings))
+                                       on_press=self.to_settings))
 
         screen1.add_widget(bl_main)
         screen2.add_widget(bl_settings)
@@ -131,28 +136,26 @@ class EmailsenderApp(App):
         self.sm.current = 'set_error'
 
     def send_e_mail(self, instance):
-        if FROM_E_MAIL and TO_E_MAIL and PASS and SUBJECT:
-            if self.date.text and self.hot_water and self.cold_water:
-                mgs = MIMEMultipart()
-                mgs['From'] = FROM_E_MAIL
-                mgs['To'] = TO_E_MAIL
-                mgs['Subject'] = SUBJECT
-                body = f'Добрый день!\n' \
-                       f'\n' \
-                       f'Показания приборов учета на {self.date.text}\n' \
-                       f'ХВС: {self.cold_water.text}\n' \
-                       f'ГВС: {self.hot_water.text}'
-                mgs.attach(MIMEText(body, 'plain'))
-                smtpObj = smtplib.SMTP('smtp.mail.ru', 587)
-                smtpObj.starttls()
-                smtpObj.login(FROM_E_MAIL, PASS)
-                smtpObj.send_message(mgs)
-                smtpObj.quit()
-                self.to_done(instance)
-            else:
-                self.to_data(instance)
+        if self.date.text and self.hot_water and self.cold_water:
+            mgs = MIMEMultipart()
+            mgs['From'] = FROM_E_MAIL
+            mgs['To'] = TO_E_MAIL
+            mgs['Subject'] = SUBJECT
+            body = f'Добрый день!\n' \
+                   f'\n' \
+                   f'Показания приборов учета на {self.date.text}\n' \
+                   f'ХВС: {self.cold_water.text}\n' \
+                   f'ГВС: {self.hot_water.text}'
+            mgs.attach(MIMEText(body, 'plain'))
+            smtpObj = smtplib.SMTP('smtp.mail.ru', 587)
+            smtpObj.starttls()
+            smtpObj.login(FROM_E_MAIL, PASS)
+            smtpObj.send_message(mgs)
+            smtpObj.quit()
+            self.to_done(instance)
         else:
-            self.bl_set_error(instance)
+            self.to_data(instance)
+
 
 
 if __name__ == "__main__":
