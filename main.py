@@ -10,17 +10,28 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from config import load_config
-
-config = load_config('.env')
-
-FROM_E_MAIL = config.profile.FROM_E_MAIL
-PASS = config.profile.PASS
-TO_E_MAIL = config.profile.TO_E_MAIL
-SUBJECT = config.profile.SUBJECT
+import sqlite
 
 
 class EmailsenderApp(App):
+    sqlite.db_connect()
+
+    def sqlite(self):
+        profiles = sqlite.get_profiles()
+        try:
+            self.FROM_E_MAIL = profiles[1]
+            self.PASS = profiles[2]
+            self.TO_E_MAIL = profiles[3]
+            self.SUBJECT = profiles[4]
+        except:
+            self.FROM_E_MAIL = None
+            self.PASS = None
+            self.TO_E_MAIL = None
+            self.SUBJECT = None
+
+    def create_new_profile(sefl, FROM_E_MAIL, PASS, TO_E_MAIL, SUBJECT):
+        sqlite.create_new_profile(FROM_E_MAIL, PASS, TO_E_MAIL, SUBJECT)
+
     def build(self):
         self.sm = ScreenManager()
         screen1 = Screen(name="main")
@@ -65,24 +76,32 @@ class EmailsenderApp(App):
         gl1 = GridLayout(cols=2,
                          padding=[25, 20])
         gl1.add_widget(Label(text='Твой email'))
-        gl1.add_widget(TextInput())
+        self.from_email = (TextInput())
+        gl1.add_widget(self.from_email)
         bl_settings.add_widget(gl1)
         gl2 = GridLayout(cols=2,
                          padding=[25, 20])
         gl2.add_widget(Label(text='Твой пароль'))
-        gl2.add_widget(TextInput(password=True))
+        self.password = TextInput(password=True)
+        gl2.add_widget(self.password)
         bl_settings.add_widget(gl2)
         gl3 = GridLayout(cols=2,
                          padding=[25, 20])
         gl3.add_widget(Label(text='Email для отправления'))
-        gl3.add_widget(TextInput())
+        self.to_email = TextInput()
+        gl3.add_widget(self.to_email)
         bl_settings.add_widget(gl3)
         gl4 = GridLayout(cols=2,
                          padding=[25, 20])
         gl4.add_widget(Label(text='Тема письма'))
-        gl4.add_widget(TextInput())
+        self.subject = TextInput()
+        gl4.add_widget(self.subject)
         bl_settings.add_widget(gl4)
-        bl_settings.add_widget(Button(text='Сохранить'))
+        bl_settings.add_widget(Button(text='Сохранить',
+                                      on_press=self.create_new_profile(self.from_email,
+                                                                       self.password,
+                                                                       self.to_email,
+                                                                       self.subject)))
         bl_settings.add_widget(Button(text='Назад',
                                       on_press=self.to_main))
 
@@ -99,7 +118,7 @@ class EmailsenderApp(App):
         bl_set_error = BoxLayout(orientation='vertical')
         bl_set_error.add_widget(Label(text='Сначала заполните контактные данные в меню "настройки"!'))
         bl_set_error.add_widget(Button(text='ОК',
-                                  on_press=self.to_settings))
+                                       on_press=self.to_settings))
 
         screen1.add_widget(bl_main)
         screen2.add_widget(bl_settings)
@@ -131,12 +150,13 @@ class EmailsenderApp(App):
         self.sm.current = 'set_error'
 
     def send_e_mail(self, instance):
-        if FROM_E_MAIL and TO_E_MAIL and PASS and SUBJECT:
+        self.sqlite()
+        if self.FROM_E_MAIL and self.TO_E_MAIL and self.PASS and self.SUBJECT:
             if self.date.text and self.hot_water and self.cold_water:
                 mgs = MIMEMultipart()
-                mgs['From'] = FROM_E_MAIL
-                mgs['To'] = TO_E_MAIL
-                mgs['Subject'] = SUBJECT
+                mgs['From'] = self.FROM_E_MAIL
+                mgs['To'] = self.TO_E_MAIL
+                mgs['Subject'] = self.SUBJECT
                 body = f'Добрый день!\n' \
                        f'\n' \
                        f'Показания приборов учета на {self.date.text}\n' \
@@ -145,7 +165,7 @@ class EmailsenderApp(App):
                 mgs.attach(MIMEText(body, 'plain'))
                 smtpObj = smtplib.SMTP('smtp.mail.ru', 587)
                 smtpObj.starttls()
-                smtpObj.login(FROM_E_MAIL, PASS)
+                smtpObj.login(self.FROM_E_MAIL, self.PASS)
                 smtpObj.send_message(mgs)
                 smtpObj.quit()
                 self.to_done(instance)
