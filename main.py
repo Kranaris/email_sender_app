@@ -131,8 +131,10 @@ class EmailsenderApp(App):
         self.sm.current = 'set_error'
 
     def create_new_profile(self):
-        sqlite.db_connect()
-        sqlite.create_new_profile(self.from_email.text, self.password.text, self.to_email.text, self.subject.text)
+        if self.from_email.text and self.password.text and self.to_email.text and self.subject.text:
+            sqlite.create_new_profile(self.from_email.text, self.password.text, self.to_email.text, self.subject.text)
+        else:
+            self.bl_set_error()
 
     def send_e_mail(self, instance):
         profiles = sqlite.get_profiles()
