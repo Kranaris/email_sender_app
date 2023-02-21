@@ -156,7 +156,7 @@ class EmailsenderApp(App):
         SUBJECT = config.profile.SUBJECT
 
         if FROM_E_MAIL and TO_E_MAIL and PASS and SUBJECT:
-            if self.date.text and self.hot_water and self.cold_water:
+            if self.date.text and self.hot_water.text and self.cold_water.text:
                 mgs = MIMEMultipart()
                 mgs['From'] = FROM_E_MAIL
                 mgs['To'] = TO_E_MAIL
