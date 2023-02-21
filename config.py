@@ -24,3 +24,11 @@ def load_config(path: str | None) -> Config:
                                   PASS=env('PASS'),
                                   TO_E_MAIL=env('TO_E_MAIL'),
                                   SUBJECT=env('SUBJECT')))
+
+
+def write_config(FROM_E_MAIL, PASS, TO_E_MAIL, SUBJECT):
+    with open(".env", "w", encoding="utf-8") as env:
+        env.write(f"FROM_E_MAIL = {FROM_E_MAIL}\n")
+        env.write(f"PASS = {PASS}\n")
+        env.write(f"TO_E_MAIL = {TO_E_MAIL}\n")
+        env.write(f"SUBJECT = {SUBJECT}\n")
