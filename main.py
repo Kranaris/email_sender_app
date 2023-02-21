@@ -10,14 +10,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from config import load_config
-
-config = load_config('.env')
-
-FROM_E_MAIL = config.profile.FROM_E_MAIL
-PASS = config.profile.PASS
-TO_E_MAIL = config.profile.TO_E_MAIL
-SUBJECT = config.profile.SUBJECT
+from config import load_config, write_config
 
 
 class EmailsenderApp(App):
@@ -29,6 +22,7 @@ class EmailsenderApp(App):
         screen3 = Screen(name="done")
         screen4 = Screen(name="data")
         screen5 = Screen(name="set_error")
+        screen6 = Screen(name="set_done")
 
         bl_main = BoxLayout(orientation='vertical',
                             padding=[25, 20],
@@ -87,7 +81,8 @@ class EmailsenderApp(App):
         self.subject = TextInput()
         gl4.add_widget(self.subject)
         bl_settings.add_widget(gl4)
-        bl_settings.add_widget(Button(text='Сохранить'))
+        bl_settings.add_widget(Button(text='Сохранить',
+                                      on_press=self.write_config))
         bl_settings.add_widget(Button(text='Назад',
                                       on_press=self.to_main))
 
@@ -106,19 +101,33 @@ class EmailsenderApp(App):
         bl_set_error.add_widget(Button(text='ОК',
                                        on_press=self.to_settings))
 
+        bl_set_done = BoxLayout(orientation='vertical')
+        bl_set_done.add_widget(Label(text='Настройки сохранены!'))
+        bl_set_done.add_widget(Button(text='ОК',
+                                      on_press=self.to_main))
+
         screen1.add_widget(bl_main)
         screen2.add_widget(bl_settings)
         screen3.add_widget(bl_done)
         screen4.add_widget(bl_data)
         screen5.add_widget(bl_set_error)
+        screen6.add_widget(bl_set_done)
 
         self.sm.add_widget(screen1)
         self.sm.add_widget(screen2)
         self.sm.add_widget(screen3)
         self.sm.add_widget(screen4)
         self.sm.add_widget(screen5)
+        self.sm.add_widget(screen6)
         self.sm.current = 'main'
         return self.sm
+
+    def write_config(self, instance):
+        if self.from_email.text and self.password.text and self.to_email.text and self.subject.text:
+            write_config(self.from_email.text, self.password.text, self.to_email.text, self.subject.text)
+            self.to_set_done(instance)
+        else:
+            self.to_set_error(instance)
 
     def to_settings(self, instance):
         self.sm.current = 'settings'
@@ -132,10 +141,19 @@ class EmailsenderApp(App):
     def to_data(self, instance):
         self.sm.current = 'data'
 
-    def bl_set_error(self, instance):
+    def to_set_error(self, instance):
         self.sm.current = 'set_error'
 
+    def to_set_done(self, instance):
+        self.sm.current = 'set_done'
+
     def send_e_mail(self, instance):
+        config = load_config('.env')
+
+        FROM_E_MAIL = config.profile.FROM_E_MAIL
+        PASS = config.profile.PASS
+        TO_E_MAIL = config.profile.TO_E_MAIL
+        SUBJECT = config.profile.SUBJECT
         if FROM_E_MAIL and TO_E_MAIL and PASS and SUBJECT:
             if self.date.text and self.hot_water and self.cold_water:
                 mgs = MIMEMultipart()
@@ -157,8 +175,7 @@ class EmailsenderApp(App):
             else:
                 self.to_data(instance)
         else:
-            self.bl_set_error(instance)
-
+            self.to_set_error(instance)
 
 
 if __name__ == "__main__":
