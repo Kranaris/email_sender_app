@@ -102,7 +102,7 @@ class EmailsenderApp(App):
                                        on_press=self.to_settings))
 
         bl_set_done = BoxLayout(orientation='vertical')
-        bl_set_done.add_widget(Label(text='Настройки сохранены!'))
+        bl_set_done.add_widget(Label(text='Изменения сохранены. Перезагрузи приложение!'))
         bl_set_done.add_widget(Button(text='ОК',
                                       on_press=self.to_main))
 
@@ -148,12 +148,13 @@ class EmailsenderApp(App):
         self.sm.current = 'set_done'
 
     def send_e_mail(self, instance):
-        config = load_config('.env')
 
+        config = load_config('.env')
         FROM_E_MAIL = config.profile.FROM_E_MAIL
         PASS = config.profile.PASS
         TO_E_MAIL = config.profile.TO_E_MAIL
         SUBJECT = config.profile.SUBJECT
+
         if FROM_E_MAIL and TO_E_MAIL and PASS and SUBJECT:
             if self.date.text and self.hot_water and self.cold_water:
                 mgs = MIMEMultipart()
