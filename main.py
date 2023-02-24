@@ -5,7 +5,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
-
+from kivy.core.window import Window
 
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -13,12 +13,11 @@ from email.mime.text import MIMEText
 
 
 class EmailsenderApp(App):
-
-    button_color = (0, 1, .8, 1)
+    button_color = (0, 1, .8, .8)
     text_color = '#00FFCE'
 
-
     def build(self):
+        Window.clearcolor = (.1, .1, .1, 1)
         self.sm = ScreenManager()
         screen1 = Screen(name="main")
         screen2 = Screen(name="settings")
@@ -37,7 +36,7 @@ class EmailsenderApp(App):
         gl1 = GridLayout(cols=2,
                          padding=[25, 20])
         gl1.add_widget(Label(text='Дата показаний',
-                                 color=self.text_color))
+                             color=self.text_color))
         self.date = TextInput(multiline=False)
         gl1.add_widget(self.date)
         bl_main.add_widget(gl1)
@@ -45,24 +44,24 @@ class EmailsenderApp(App):
                          padding=[25, 20])
         bl_main.add_widget(gl2)
         gl2.add_widget(Label(text='Горячая вода',
-                                 color=self.text_color))
+                             color=self.text_color))
         self.cold_water = TextInput(multiline=False)
         gl2.add_widget(self.cold_water)
         gl3 = GridLayout(cols=2,
                          padding=[25, 20])
         gl3.add_widget(Label(text='Холодная вода',
-                                 color=self.text_color))
+                             color=self.text_color))
         self.hot_water = TextInput(multiline=False)
         gl3.add_widget(self.hot_water)
         bl_main.add_widget(gl3)
 
         bl_main.add_widget(Button(text='Отправить сообщение',
                                   on_press=self.send_e_mail,
-                                  background_color =self.button_color,
+                                  background_color=self.button_color,
                                   bold=True))
         bl_main.add_widget(Button(text='Настройки',
                                   on_press=self.to_settings,
-                                  background_color =self.button_color,
+                                  background_color=self.button_color,
                                   bold=True))
 
         bl_settings = BoxLayout(orientation='vertical',
@@ -73,14 +72,14 @@ class EmailsenderApp(App):
         gl1 = GridLayout(cols=2,
                          padding=[25, 20])
         gl1.add_widget(Label(text='Твой email',
-                                 color=self.text_color))
+                             color=self.text_color))
         self.from_email = (TextInput(multiline=False))
         gl1.add_widget(self.from_email)
         bl_settings.add_widget(gl1)
         gl2 = GridLayout(cols=2,
                          padding=[25, 20])
         gl2.add_widget(Label(text='Твой пароль',
-                                 color=self.text_color))
+                             color=self.text_color))
         self.password = TextInput(multiline=False,
                                   password=True)
         gl2.add_widget(self.password)
@@ -88,24 +87,24 @@ class EmailsenderApp(App):
         gl3 = GridLayout(cols=2,
                          padding=[25, 20])
         gl3.add_widget(Label(text='Email для отправления',
-                                 color=self.text_color))
+                             color=self.text_color))
         self.to_email = TextInput(multiline=False)
         gl3.add_widget(self.to_email)
         bl_settings.add_widget(gl3)
         gl4 = GridLayout(cols=2,
                          padding=[25, 20])
         gl4.add_widget(Label(text='Тема письма',
-                                 color=self.text_color))
+                             color=self.text_color))
         self.subject = TextInput()
         gl4.add_widget(self.subject)
         bl_settings.add_widget(gl4)
         bl_settings.add_widget(Button(text='Сохранить',
                                       on_press=self.write_config,
-                                      background_color =self.button_color,
+                                      background_color=self.button_color,
                                       bold=True))
         bl_settings.add_widget(Button(text='Назад',
                                       on_press=self.to_main,
-                                      background_color =self.button_color,
+                                      background_color=self.button_color,
                                       bold=True))
 
         bl_done = BoxLayout(orientation='vertical')
@@ -113,7 +112,7 @@ class EmailsenderApp(App):
                                  color=self.text_color))
         bl_done.add_widget(Button(text='ОК',
                                   on_press=self.to_main,
-                                  background_color =self.button_color,
+                                  background_color=self.button_color,
                                   bold=True))
 
         bl_data = BoxLayout(orientation='vertical')
@@ -121,33 +120,33 @@ class EmailsenderApp(App):
                                  color=self.text_color))
         bl_data.add_widget(Button(text='ОК',
                                   on_press=self.to_main,
-                                  background_color =self.button_color,
+                                  background_color=self.button_color,
                                   bold=True))
 
         bl_set_error = BoxLayout(orientation='vertical')
         bl_set_error.add_widget(Label(text='Заполните поля!',
-                                 color=self.text_color))
+                                      color=self.text_color))
         bl_set_error.add_widget(Button(text='ОК',
                                        on_press=self.to_settings,
-                                       background_color =self.button_color,
+                                       background_color=self.button_color,
                                        bold=True))
 
         bl_set_done = BoxLayout(orientation='vertical')
         bl_set_done.add_widget(Label(text='Изменения сохранены!',
-                                 color=self.text_color))
+                                     color=self.text_color))
         bl_set_done.add_widget(Button(text='ОК',
                                       on_press=self.to_main,
-                                      background_color =self.button_color,
+                                      background_color=self.button_color,
                                       bold=True))
 
         bl_send_error = BoxLayout(orientation='vertical')
         bl_send_error.add_widget(Label(text='Ошибка отправления!\n\n'
-                                          'Проверьте настройки!',
-                                 color=self.text_color))
+                                            'Проверьте настройки!',
+                                       color=self.text_color))
         bl_send_error.add_widget(Button(text='ОК',
-                                      on_press=self.to_settings,
-                                      background_color =self.button_color,
-                                      bold=True))
+                                        on_press=self.to_settings,
+                                        background_color=self.button_color,
+                                        bold=True))
 
         screen1.add_widget(bl_main)
         screen2.add_widget(bl_settings)
@@ -213,7 +212,6 @@ class EmailsenderApp(App):
             PASS = None
             TO_E_MAIL = None
             SUBJECT = None
-
 
         if FROM_E_MAIL and TO_E_MAIL and PASS and SUBJECT:
             if self.date.text and self.hot_water.text and self.cold_water.text:
