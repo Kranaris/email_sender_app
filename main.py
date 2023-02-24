@@ -202,22 +202,25 @@ class EmailsenderApp(App):
 
         if FROM_E_MAIL and TO_E_MAIL and PASS and SUBJECT:
             if self.date.text and self.hot_water.text and self.cold_water.text:
-                mgs = MIMEMultipart()
-                mgs['From'] = FROM_E_MAIL
-                mgs['To'] = TO_E_MAIL
-                mgs['Subject'] = SUBJECT
-                body = f'Добрый день!\n' \
-                       f'\n' \
-                       f'Показания приборов учета на {self.date.text}\n' \
-                       f'ХВС: {self.cold_water.text}\n' \
-                       f'ГВС: {self.hot_water.text}'
-                mgs.attach(MIMEText(body, 'plain'))
-                smtpObj = smtplib.SMTP('smtp.mail.ru', 587)
-                smtpObj.starttls()
-                smtpObj.login(FROM_E_MAIL, PASS)
-                smtpObj.send_message(mgs)
-                smtpObj.quit()
-                self.to_done(instance)
+                try:
+                    mgs = MIMEMultipart()
+                    mgs['From'] = FROM_E_MAIL
+                    mgs['To'] = TO_E_MAIL
+                    mgs['Subject'] = SUBJECT
+                    body = f'Добрый день!\n' \
+                           f'\n' \
+                           f'Показания приборов учета на {self.date.text}\n' \
+                           f'ХВС: {self.cold_water.text}\n' \
+                           f'ГВС: {self.hot_water.text}'
+                    mgs.attach(MIMEText(body, 'plain'))
+                    smtpObj = smtplib.SMTP('smtp.mail.ru', 587)
+                    smtpObj.starttls()
+                    smtpObj.login(FROM_E_MAIL, PASS)
+                    smtpObj.send_message(mgs)
+                    smtpObj.quit()
+                    self.to_done(instance)
+                except:
+                    self.to_data(instance)
             else:
                 self.to_data(instance)
         else:
