@@ -10,8 +10,6 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from config import load_config, write_config
-
 
 class EmailsenderApp(App):
 
@@ -102,7 +100,7 @@ class EmailsenderApp(App):
                                        on_press=self.to_settings))
 
         bl_set_done = BoxLayout(orientation='vertical')
-        bl_set_done.add_widget(Label(text='Изменения сохранены. Перезагрузи приложение!'))
+        bl_set_done.add_widget(Label(text='Изменения сохранены!'))
         bl_set_done.add_widget(Button(text='ОК',
                                       on_press=self.to_main))
 
@@ -124,7 +122,11 @@ class EmailsenderApp(App):
 
     def write_config(self, instance):
         if self.from_email.text and self.password.text and self.to_email.text and self.subject.text:
-            write_config(self.from_email.text, self.password.text, self.to_email.text, self.subject.text)
+            with open("config.txt", "w", encoding="utf-8") as config:
+                config.write(f"FROM_E_MAIL = {self.from_email.text}\n")
+                config.write(f"PASS = {self.password.text}\n")
+                config.write(f"TO_E_MAIL = {self.to_email.text}\n")
+                config.write(f"SUBJECT = {self.subject.text}\n")
             self.to_set_done(instance)
         else:
             self.to_set_error(instance)
@@ -149,11 +151,17 @@ class EmailsenderApp(App):
 
     def send_e_mail(self, instance):
 
-        config = load_config('.env')
-        FROM_E_MAIL = config.profile.FROM_E_MAIL
-        PASS = config.profile.PASS
-        TO_E_MAIL = config.profile.TO_E_MAIL
-        SUBJECT = config.profile.SUBJECT
+        with open("config.txt", "r", encoding="utf-8") as config:
+            config = config.readlines()
+            print(config)
+            FROM_E_MAIL = config[0][14:]
+            print(FROM_E_MAIL)
+            PASS = config[1][7:]
+            print(PASS)
+            TO_E_MAIL = config[2][12:]
+            print(TO_E_MAIL)
+            SUBJECT = config[3][10:]
+            print(SUBJECT)
 
         if FROM_E_MAIL and TO_E_MAIL and PASS and SUBJECT:
             if self.date.text and self.hot_water.text and self.cold_water.text:
