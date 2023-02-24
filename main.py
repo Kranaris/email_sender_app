@@ -232,7 +232,6 @@ class EmailsenderApp(App):
         self.sm.current = 'send_error'
 
     def send_e_mail(self, instance):
-
         try:
             with open("config.txt", "r", encoding="utf-8") as config:
                 config = config.readlines()
