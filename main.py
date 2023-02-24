@@ -16,6 +16,7 @@ class EmailsenderApp(App):
     button_color = (0, 1, .8, .8)
     text_color = '#00FFCE'
 
+
     def build(self):
         Window.clearcolor = (.1, .1, .1, 1)
         self.sm = ScreenManager()
@@ -31,35 +32,45 @@ class EmailsenderApp(App):
                             padding=[25, 20],
                             spacing=5)
         bl_main.add_widget(Label(text="Ввод показаний",
+                                 font_size=40,
                                  color=self.text_color))
 
         gl1 = GridLayout(cols=2,
                          padding=[25, 20])
         gl1.add_widget(Label(text='Дата показаний',
+                             font_size=20,
                              color=self.text_color))
-        self.date = TextInput(multiline=False)
+        self.date = TextInput(multiline=False,
+                              padding_y=(15, 15))
         gl1.add_widget(self.date)
         bl_main.add_widget(gl1)
         gl2 = GridLayout(cols=2,
                          padding=[25, 20])
         bl_main.add_widget(gl2)
         gl2.add_widget(Label(text='Горячая вода',
+                             font_size=20,
                              color=self.text_color))
-        self.cold_water = TextInput(multiline=False)
+        self.cold_water = TextInput(multiline=False,
+                              padding_y=(15, 15))
         gl2.add_widget(self.cold_water)
         gl3 = GridLayout(cols=2,
                          padding=[25, 20])
         gl3.add_widget(Label(text='Холодная вода',
+                             font_size=20,
                              color=self.text_color))
-        self.hot_water = TextInput(multiline=False)
+        self.hot_water = TextInput(multiline=False,
+                              padding_y=(10, 10),
+                              size_hint=(1,.5))
         gl3.add_widget(self.hot_water)
         bl_main.add_widget(gl3)
 
         bl_main.add_widget(Button(text='Отправить сообщение',
+                                  font_size=35,
                                   on_press=self.send_e_mail,
                                   background_color=self.button_color,
                                   bold=True))
         bl_main.add_widget(Button(text='Настройки',
+                                  font_size=35,
                                   on_press=self.to_settings,
                                   background_color=self.button_color,
                                   bold=True))
@@ -68,73 +79,93 @@ class EmailsenderApp(App):
                                 padding=[25, 20],
                                 spacing=5)
         bl_settings.add_widget(Label(text='Настройки',
+                                     font_size=40,
                                      color='#00FFCE'))
         gl1 = GridLayout(cols=2,
                          padding=[25, 20])
         gl1.add_widget(Label(text='Твой email',
+                             font_size=20,
                              color=self.text_color))
-        self.from_email = (TextInput(multiline=False))
+        self.from_email = TextInput(multiline=False,
+                              padding_y=(15, 15))
         gl1.add_widget(self.from_email)
         bl_settings.add_widget(gl1)
         gl2 = GridLayout(cols=2,
                          padding=[25, 20])
         gl2.add_widget(Label(text='Твой пароль',
+                             font_size=20,
                              color=self.text_color))
-        self.password = TextInput(multiline=False,
-                                  password=True)
+        self.password = TextInput(password=True,
+                                  multiline=False,
+                                  padding_y=(15, 15))
         gl2.add_widget(self.password)
         bl_settings.add_widget(gl2)
         gl3 = GridLayout(cols=2,
                          padding=[25, 20])
-        gl3.add_widget(Label(text='Email для отправления',
+        gl3.add_widget(Label(text='Email отправления',
+                             font_size=20,
                              color=self.text_color))
-        self.to_email = TextInput(multiline=False)
+        self.to_email = TextInput(multiline=False,
+                              padding_y=(15, 15))
         gl3.add_widget(self.to_email)
         bl_settings.add_widget(gl3)
         gl4 = GridLayout(cols=2,
                          padding=[25, 20])
         gl4.add_widget(Label(text='Тема письма',
+                             font_size=20,
                              color=self.text_color))
-        self.subject = TextInput()
+        self.subject = TextInput(multiline=False,
+                              padding_y=(10, 10))
         gl4.add_widget(self.subject)
         bl_settings.add_widget(gl4)
         bl_settings.add_widget(Button(text='Сохранить',
+                                      font_size=35,
                                       on_press=self.write_config,
                                       background_color=self.button_color,
                                       bold=True))
         bl_settings.add_widget(Button(text='Назад',
+                                      font_size=35,
                                       on_press=self.to_main,
                                       background_color=self.button_color,
                                       bold=True))
 
         bl_done = BoxLayout(orientation='vertical')
         bl_done.add_widget(Label(text='Показания отправлены!',
+                                 font_size=35,
                                  color=self.text_color))
         bl_done.add_widget(Button(text='ОК',
+                                  font_size=35,
                                   on_press=self.to_main,
                                   background_color=self.button_color,
                                   bold=True))
 
         bl_data = BoxLayout(orientation='vertical')
-        bl_data.add_widget(Label(text='Сначала введи показания приборов!',
+        bl_data.add_widget(Label(text='Сначала введи\n'
+                                      'показания приборов!',
+                                 font_size=35,
                                  color=self.text_color))
         bl_data.add_widget(Button(text='ОК',
+                                  font_size=35,
                                   on_press=self.to_main,
                                   background_color=self.button_color,
                                   bold=True))
 
         bl_set_error = BoxLayout(orientation='vertical')
         bl_set_error.add_widget(Label(text='Заполните поля!',
+                                      font_size=35,
                                       color=self.text_color))
         bl_set_error.add_widget(Button(text='ОК',
+                                       font_size=35,
                                        on_press=self.to_settings,
                                        background_color=self.button_color,
                                        bold=True))
 
         bl_set_done = BoxLayout(orientation='vertical')
         bl_set_done.add_widget(Label(text='Изменения сохранены!',
+                                     font_size=35,
                                      color=self.text_color))
         bl_set_done.add_widget(Button(text='ОК',
+                                      font_size=35,
                                       on_press=self.to_main,
                                       background_color=self.button_color,
                                       bold=True))
@@ -142,8 +173,10 @@ class EmailsenderApp(App):
         bl_send_error = BoxLayout(orientation='vertical')
         bl_send_error.add_widget(Label(text='Ошибка отправления!\n\n'
                                             'Проверьте настройки!',
+                                       font_size=35,
                                        color=self.text_color))
         bl_send_error.add_widget(Button(text='ОК',
+                                        font_size=35,
                                         on_press=self.to_settings,
                                         background_color=self.button_color,
                                         bold=True))
