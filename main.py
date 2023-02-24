@@ -26,6 +26,7 @@ class EmailsenderApp(App):
         screen4 = Screen(name="data")
         screen5 = Screen(name="set_error")
         screen6 = Screen(name="set_done")
+        screen7 = Screen(name="send_error")
 
         bl_main = BoxLayout(orientation='vertical',
                             padding=[25, 20],
@@ -139,12 +140,22 @@ class EmailsenderApp(App):
                                       background_color =self.button_color,
                                       bold=True))
 
+        bl_send_error = BoxLayout(orientation='vertical')
+        bl_send_error.add_widget(Label(text='Ошибка отправления!\n\n'
+                                          'Проверьте настройки!',
+                                 color=self.text_color))
+        bl_send_error.add_widget(Button(text='ОК',
+                                      on_press=self.to_settings,
+                                      background_color =self.button_color,
+                                      bold=True))
+
         screen1.add_widget(bl_main)
         screen2.add_widget(bl_settings)
         screen3.add_widget(bl_done)
         screen4.add_widget(bl_data)
         screen5.add_widget(bl_set_error)
         screen6.add_widget(bl_set_done)
+        screen7.add_widget(bl_send_error)
 
         self.sm.add_widget(screen1)
         self.sm.add_widget(screen2)
@@ -152,6 +163,7 @@ class EmailsenderApp(App):
         self.sm.add_widget(screen4)
         self.sm.add_widget(screen5)
         self.sm.add_widget(screen6)
+        self.sm.add_widget(screen7)
         self.sm.current = 'main'
         return self.sm
 
@@ -183,6 +195,9 @@ class EmailsenderApp(App):
 
     def to_set_done(self, instance):
         self.sm.current = 'set_done'
+
+    def to_send_error(self, instance):
+        self.sm.current = 'send_error'
 
     def send_e_mail(self, instance):
 
@@ -220,7 +235,7 @@ class EmailsenderApp(App):
                     smtpObj.quit()
                     self.to_done(instance)
                 except:
-                    self.to_data(instance)
+                    self.to_send_error(instance)
             else:
                 self.to_data(instance)
         else:
