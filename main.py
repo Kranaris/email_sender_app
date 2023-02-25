@@ -6,18 +6,23 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.core.window import Window
+import datetime
 
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-class EmailsenderApp(App):
 
+class EmailsenderApp(App):
     button_color = (0, 1, .8, .8)
     text_color = '#00FFCE'
     font_size = 50
 
     def build(self):
+
+        now = datetime.datetime.now()
+        date = now.strftime("%d.%m.%Y")
+
         Window.clearcolor = (.1, .1, .1, 1)
         self.sm = ScreenManager()
         screen1 = Screen(name="main")
@@ -36,17 +41,18 @@ class EmailsenderApp(App):
                                  color=self.text_color))
 
         gl1 = GridLayout(cols=2,
-                         padding=[50, 130])
+                         padding=[50, 100])
         gl1.add_widget(Label(text='Дата показаний',
                              font_size=self.font_size,
                              color=self.text_color))
         self.date = TextInput(multiline=False,
+                              text=f'{date}',
                               font_size=self.font_size,
                               halign="center")
         gl1.add_widget(self.date)
         bl_main.add_widget(gl1)
         gl2 = GridLayout(cols=2,
-                         padding=[50, 130])
+                         padding=[50, 100])
         bl_main.add_widget(gl2)
         gl2.add_widget(Label(text='Горячая вода',
                              font_size=self.font_size,
@@ -56,7 +62,7 @@ class EmailsenderApp(App):
                                     halign="center")
         gl2.add_widget(self.cold_water)
         gl3 = GridLayout(cols=2,
-                         padding=[50, 130])
+                         padding=[50, 100])
         gl3.add_widget(Label(text='Холодная вода',
                              font_size=self.font_size,
                              color=self.text_color))
@@ -85,7 +91,7 @@ class EmailsenderApp(App):
                                      color='#00FFCE'))
 
         gl1 = GridLayout(cols=2,
-                         padding=[30, 120])
+                         padding=[30, 80])
         gl1.add_widget(Label(text='Твой email',
                              font_size=self.font_size,
                              color=self.text_color))
@@ -94,7 +100,7 @@ class EmailsenderApp(App):
         gl1.add_widget(self.from_email)
         bl_settings.add_widget(gl1)
         gl2 = GridLayout(cols=2,
-                         padding=[30, 120])
+                         padding=[30, 80])
         gl2.add_widget(Label(text='Твой пароль',
                              font_size=self.font_size,
                              color=self.text_color))
@@ -104,7 +110,7 @@ class EmailsenderApp(App):
         gl2.add_widget(self.password)
         bl_settings.add_widget(gl2)
         gl3 = GridLayout(cols=2,
-                         padding=[30, 120])
+                         padding=[30, 80])
         gl3.add_widget(Label(text='Email отправления',
                              font_size=self.font_size,
                              color=self.text_color))
@@ -113,7 +119,7 @@ class EmailsenderApp(App):
         gl3.add_widget(self.to_email)
         bl_settings.add_widget(gl3)
         gl4 = GridLayout(cols=2,
-                         padding=[30, 120])
+                         padding=[30, 80])
         gl4.add_widget(Label(text='Тема письма',
                              font_size=self.font_size,
                              color=self.text_color,
@@ -206,12 +212,15 @@ class EmailsenderApp(App):
 
     def write_config(self, instance):
         if self.from_email.text and self.password.text and self.to_email.text and self.subject.text:
-            with open("config.txt", "w", encoding="utf-8") as config:
-                config.write(f"FROM_E_MAIL = {self.from_email.text}\n")
-                config.write(f"PASS = {self.password.text}\n")
-                config.write(f"TO_E_MAIL = {self.to_email.text}\n")
-                config.write(f"SUBJECT = {self.subject.text}\n")
-            self.to_set_done(instance)
+            try:
+                with open("config.txt", "w", encoding="utf-8") as config:
+                    config.write(f"FROM_E_MAIL = {self.from_email.text}\n")
+                    config.write(f"PASS = {self.password.text}\n")
+                    config.write(f"TO_E_MAIL = {self.to_email.text}\n")
+                    config.write(f"SUBJECT = {self.subject.text}\n")
+                self.to_set_done(instance)
+            except:
+                self.to_set_error(instance)
         else:
             self.to_set_error(instance)
 
