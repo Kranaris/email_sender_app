@@ -11,8 +11,6 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-Window.size = (1080, 2340)
-
 class EmailsenderApp(App):
 
     button_color = (0, 1, .8, .8)
