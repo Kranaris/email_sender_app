@@ -78,7 +78,7 @@ class EmailsenderApp(App):
                                   background_color=self.button_color,
                                   bold=True))
         bl_main.add_widget(Button(text='Настройки',
-                                  font_size=60,
+                                  font_size=self.font_size,
                                   on_press=self.to_settings,
                                   background_color=self.button_color,
                                   bold=True))
