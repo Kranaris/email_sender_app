@@ -16,6 +16,7 @@ from email.mime.text import MIMEText
 
 import sqlite
 
+
 class EmailsenderApp(App):
     button_color = (0, 1, .8, .8)
     text_color = '#00FFCE'
@@ -24,22 +25,8 @@ class EmailsenderApp(App):
     def build(self):
         sqlite.db_connect()
 
-        self.history_grid = GridLayout(cols=3, spacing=50, size_hint_y=None)
-        self.history_grid.bind(minimum_height=self.history_grid.setter('height'))
-        for i in sqlite.get_all_data():
-            self.history_grid.add_widget(Label(text=str(i[1]),
-                                               font_size=self.font_size,
-                                               color=self.text_color))
-            self.history_grid.add_widget(Label(text=str(i[2]),
-                                               font_size=self.font_size,
-                                               color=self.text_color))
-            self.history_grid.add_widget(Label(text=str(i[3]),
-                                               font_size=self.font_size,
-                                               color = self.text_color))
-
-
-
         Window.clearcolor = (.1, .1, .1, 1)
+
         self.sm = ScreenManager()
 
         now = datetime.datetime.now()
@@ -122,7 +109,8 @@ class EmailsenderApp(App):
                          padding=[30, 80])
         gl1.add_widget(Label(text='Твой email',
                              font_size=self.font_size,
-                             color=self.text_color))
+                             color=self.text_color,
+                             padding_y=20))
         self.from_email = TextInput(multiline=False,
                                     font_size=self.font_size)
         gl1.add_widget(self.from_email)
@@ -221,8 +209,8 @@ class EmailsenderApp(App):
                                         bold=True))
 
         bl_history = BoxLayout(orientation='vertical',
-                                padding=[30, 20],
-                                spacing=20)
+                               padding=[30, 20],
+                               spacing=20)
         gl_hostory = GridLayout(cols=3, spacing=50, size_hint_y=None)
 
         gl_hostory.add_widget(Label(text='Дата',
@@ -235,6 +223,20 @@ class EmailsenderApp(App):
                                     font_size=self.font_size,
                                     color=self.text_color))
         bl_history.add_widget(gl_hostory)
+
+        self.history_grid = GridLayout(cols=3, spacing=50, size_hint_y=None)
+        self.history_grid.bind(minimum_height=self.history_grid.setter('height'))
+        for i in sqlite.get_all_data():
+            self.history_grid.add_widget(Label(text=str(i[1]),
+                                               font_size=self.font_size,
+                                               color=self.text_color))
+            self.history_grid.add_widget(Label(text=str(i[2]),
+                                               font_size=self.font_size,
+                                               color=self.text_color))
+            self.history_grid.add_widget(Label(text=str(i[3]),
+                                               font_size=self.font_size,
+                                               color=self.text_color))
+
         sv_history = ScrollView()
         sv_history.add_widget(self.history_grid)
         bl_history.add_widget(sv_history)
