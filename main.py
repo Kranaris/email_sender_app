@@ -4,6 +4,8 @@ from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.scrollview import ScrollView
+
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.core.window import Window
 import datetime
@@ -12,6 +14,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+import sqlite
 
 class EmailsenderApp(App):
     button_color = (0, 1, .8, .8)
@@ -19,12 +22,29 @@ class EmailsenderApp(App):
     font_size = 50
 
     def build(self):
+        sqlite.db_connect()
+
+        self.history_grid = GridLayout(cols=3, spacing=50, size_hint_y=None)
+        self.history_grid.bind(minimum_height=self.history_grid.setter('height'))
+        for i in sqlite.get_all_data():
+            self.history_grid.add_widget(Label(text=str(i[1]),
+                                               font_size=self.font_size,
+                                               color=self.text_color))
+            self.history_grid.add_widget(Label(text=str(i[2]),
+                                               font_size=self.font_size,
+                                               color=self.text_color))
+            self.history_grid.add_widget(Label(text=str(i[3]),
+                                               font_size=self.font_size,
+                                               color = self.text_color))
+
+
+
+        Window.clearcolor = (.1, .1, .1, 1)
+        self.sm = ScreenManager()
 
         now = datetime.datetime.now()
         date = now.strftime("%d.%m.%Y")
 
-        Window.clearcolor = (.1, .1, .1, 1)
-        self.sm = ScreenManager()
         screen1 = Screen(name="main")
         screen2 = Screen(name="settings")
         screen3 = Screen(name="done")
@@ -32,9 +52,10 @@ class EmailsenderApp(App):
         screen5 = Screen(name="set_error")
         screen6 = Screen(name="set_done")
         screen7 = Screen(name="send_error")
+        screen8 = Screen(name="history")
 
         bl_main = BoxLayout(orientation='vertical',
-                            padding=[50, 20],
+                            padding=[50, 10],
                             spacing=50)
         bl_main.add_widget(Label(text="Ввод показаний",
                                  font_size=80,
@@ -77,6 +98,13 @@ class EmailsenderApp(App):
                                   on_press=self.send_e_mail,
                                   background_color=self.button_color,
                                   bold=True))
+
+        bl_main.add_widget(Button(text='История отправлений',
+                                  font_size=self.font_size,
+                                  on_press=self.to_history,
+                                  background_color=self.button_color,
+                                  bold=True))
+
         bl_main.add_widget(Button(text='Настройки',
                                   font_size=self.font_size,
                                   on_press=self.to_settings,
@@ -192,6 +220,30 @@ class EmailsenderApp(App):
                                         background_color=self.button_color,
                                         bold=True))
 
+        bl_history = BoxLayout(orientation='vertical',
+                                padding=[30, 20],
+                                spacing=20)
+        gl_hostory = GridLayout(cols=3, spacing=50, size_hint_y=None)
+
+        gl_hostory.add_widget(Label(text='Дата',
+                                    font_size=self.font_size,
+                                    color=self.text_color))
+        gl_hostory.add_widget(Label(text='ХВС',
+                                    font_size=self.font_size,
+                                    color=self.text_color))
+        gl_hostory.add_widget(Label(text='ГВС',
+                                    font_size=self.font_size,
+                                    color=self.text_color))
+        bl_history.add_widget(gl_hostory)
+        sv_history = ScrollView()
+        sv_history.add_widget(self.history_grid)
+        bl_history.add_widget(sv_history)
+        bl_history.add_widget(Button(text='Назад',
+                                     font_size=self.font_size,
+                                     on_press=self.to_main,
+                                     background_color=self.button_color,
+                                     bold=True))
+
         screen1.add_widget(bl_main)
         screen2.add_widget(bl_settings)
         screen3.add_widget(bl_done)
@@ -199,6 +251,7 @@ class EmailsenderApp(App):
         screen5.add_widget(bl_set_error)
         screen6.add_widget(bl_set_done)
         screen7.add_widget(bl_send_error)
+        screen8.add_widget(bl_history)
 
         self.sm.add_widget(screen1)
         self.sm.add_widget(screen2)
@@ -207,6 +260,7 @@ class EmailsenderApp(App):
         self.sm.add_widget(screen5)
         self.sm.add_widget(screen6)
         self.sm.add_widget(screen7)
+        self.sm.add_widget(screen8)
         self.sm.current = 'main'
         return self.sm
 
@@ -245,6 +299,9 @@ class EmailsenderApp(App):
     def to_send_error(self, instance):
         self.sm.current = 'send_error'
 
+    def to_history(self, instance):
+        self.sm.current = 'history'
+
     def send_e_mail(self, instance):
         try:
             with open("config.txt", "r", encoding="utf-8") as config:
@@ -278,6 +335,7 @@ class EmailsenderApp(App):
                     smtpObj.send_message(mgs)
                     smtpObj.quit()
                     self.to_done(instance)
+                    sqlite.create_new_data(self.date.text, self.cold_water.text, self.hot_water.text)
                 except:
                     self.to_send_error(instance)
             else:
