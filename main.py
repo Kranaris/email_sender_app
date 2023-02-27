@@ -244,7 +244,8 @@ class EmailsenderApp(App):
                                      font_size=self.font_size,
                                      on_press=self.to_main,
                                      background_color=self.button_color,
-                                     bold=True))
+                                     bold=True,
+                                     size_hint=[1, .2]))
 
         screen1.add_widget(bl_main)
         screen2.add_widget(bl_settings)
