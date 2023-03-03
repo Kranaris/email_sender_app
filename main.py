@@ -71,7 +71,8 @@ class EmailsenderApp(App):
         gl2.add_widget(Button(text='-',
                               background_color=self.button_color,
                               font_size=self.font_size,
-                              size_hint=[.2, 1]))
+                              size_hint=[.2, 1],
+                              on_press=self.cw_min))
 
         self.cold_water = TextInput(multiline=False,
                                     text=str(self.get_data_history()[-2]),
@@ -83,7 +84,8 @@ class EmailsenderApp(App):
         gl2.add_widget(Button(text='+',
                               background_color=self.button_color,
                               font_size=self.font_size,
-                              size_hint=[.2, 1]))
+                              size_hint=[.2, 1],
+                              on_press=self.cw_plus))
 
         gl3 = GridLayout(cols=4,
                          padding=[50, 100])
@@ -93,7 +95,8 @@ class EmailsenderApp(App):
         gl3.add_widget(Button(text='-',
                               background_color=self.button_color,
                               font_size=self.font_size,
-                              size_hint=[.2, 1]))
+                              size_hint=[.2, 1],
+                              on_press=self.hw_min))
         self.hot_water = TextInput(multiline=False,
                                    text=str(self.get_data_history()[-1]),
                                    font_size=self.font_size,
@@ -103,7 +106,8 @@ class EmailsenderApp(App):
         gl3.add_widget(Button(text='+',
                               background_color=self.button_color,
                               font_size=self.font_size,
-                              size_hint=[.2, 1]))
+                              size_hint=[.2, 1],
+                              on_press=self.hw_plus))
         bl_main.add_widget(gl3)
 
         bl_main.add_widget(Button(text='Отправить сообщение',
@@ -252,15 +256,20 @@ class EmailsenderApp(App):
         self.history_grid = GridLayout(cols=3, spacing=50, size_hint_y=None)
         self.history_grid.bind(minimum_height=self.history_grid.setter('height'))
         for i in sqlite.get_all_data():
-            self.history_grid.add_widget(Label(text=str(i[1]),
-                                               font_size=self.font_size,
-                                               color=self.text_color))
-            self.history_grid.add_widget(Label(text=str(i[2]),
-                                               font_size=self.font_size,
-                                               color=self.text_color))
-            self.history_grid.add_widget(Label(text=str(i[3]),
-                                               font_size=self.font_size,
-                                               color=self.text_color))
+            self.label_history_data = Label(text=str(i[1]),
+                                       font_size=self.font_size,
+                                       color=self.text_color)
+            self.history_grid.add_widget(self.label_history_data)
+
+            self.label_history_cw = Label(text=str(i[2]),
+                                          font_size=self.font_size,
+                                          color=self.text_color)
+            self.history_grid.add_widget(self.label_history_cw)
+
+            self.label_history_hw = Label(text=str(i[3]),
+                                          font_size=self.font_size,
+                                          color=self.text_color)
+            self.history_grid.add_widget(self.label_history_hw)
 
         sv_history = ScrollView()
         sv_history.add_widget(self.history_grid)
@@ -311,6 +320,18 @@ class EmailsenderApp(App):
                 self.to_set_error(instance)
         else:
             self.to_set_error(instance)
+
+    def cw_min(self, instance):
+        self.cold_water.text = str(int(self.cold_water.text) - 1)
+
+    def cw_plus(self, instance):
+        self.cold_water.text = str(int(self.cold_water.text) + 1)
+
+    def hw_min(self, instance):
+        self.hot_water.text = str(int(self.hot_water.text) - 1)
+
+    def hw_plus(self, instance):
+        self.hot_water.text = str(int(self.hot_water.text) + 1)
 
     def to_settings(self, instance):
         self.sm.current = 'settings'
