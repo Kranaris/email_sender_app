@@ -16,6 +16,8 @@ from email.mime.text import MIMEText
 
 import sqlite
 
+Window.size = (1080, 2340)
+
 
 class EmailsenderApp(App):
     button_color = (0, 1, .8, .8)
@@ -59,25 +61,49 @@ class EmailsenderApp(App):
                               halign="center")
         gl1.add_widget(self.date)
         bl_main.add_widget(gl1)
-        gl2 = GridLayout(cols=2,
+        gl2 = GridLayout(cols=4,
                          padding=[50, 100])
         bl_main.add_widget(gl2)
-        gl2.add_widget(Label(text='Горячая вода',
+        gl2.add_widget(Label(text='ХВС',
                              font_size=self.font_size,
                              color=self.text_color))
+
+        gl2.add_widget(Button(text='-',
+                              background_color=self.button_color,
+                              font_size=self.font_size,
+                              size_hint=[.2, 1]))
+
         self.cold_water = TextInput(multiline=False,
+                                    text=str(self.get_data_history()[-2]),
                                     font_size=self.font_size,
-                                    halign="center")
+                                    halign="center",
+                                    size_hint=[.3, 1])
         gl2.add_widget(self.cold_water)
-        gl3 = GridLayout(cols=2,
+
+        gl2.add_widget(Button(text='+',
+                              background_color=self.button_color,
+                              font_size=self.font_size,
+                              size_hint=[.2, 1]))
+
+        gl3 = GridLayout(cols=4,
                          padding=[50, 100])
-        gl3.add_widget(Label(text='Холодная вода',
+        gl3.add_widget(Label(text='ГВС',
                              font_size=self.font_size,
                              color=self.text_color))
+        gl3.add_widget(Button(text='-',
+                              background_color=self.button_color,
+                              font_size=self.font_size,
+                              size_hint=[.2, 1]))
         self.hot_water = TextInput(multiline=False,
+                                   text=str(self.get_data_history()[-1]),
                                    font_size=self.font_size,
-                                   halign="center")
+                                   halign="center",
+                                   size_hint=[.3, 1])
         gl3.add_widget(self.hot_water)
+        gl3.add_widget(Button(text='+',
+                              background_color=self.button_color,
+                              font_size=self.font_size,
+                              size_hint=[.2, 1]))
         bl_main.add_widget(gl3)
 
         bl_main.add_widget(Button(text='Отправить сообщение',
@@ -109,8 +135,7 @@ class EmailsenderApp(App):
                          padding=[30, 80])
         gl1.add_widget(Label(text='Твой email',
                              font_size=self.font_size,
-                             color=self.text_color,
-                             padding_y=20))
+                             color=self.text_color))
         self.from_email = TextInput(multiline=False,
                                     font_size=self.font_size)
         gl1.add_widget(self.from_email)
@@ -127,7 +152,7 @@ class EmailsenderApp(App):
         bl_settings.add_widget(gl2)
         gl3 = GridLayout(cols=2,
                          padding=[30, 80])
-        gl3.add_widget(Label(text='Email отправления',
+        gl3.add_widget(Label(text='Email получателя',
                              font_size=self.font_size,
                              color=self.text_color))
         self.to_email = TextInput(multiline=False,
@@ -266,6 +291,12 @@ class EmailsenderApp(App):
         self.sm.add_widget(screen8)
         self.sm.current = 'main'
         return self.sm
+
+    def get_data_history(self):
+        data = sqlite.get_all_data()
+        if data:
+            return data[-1]
+        return [0, 0]
 
     def write_config(self, instance):
         if self.from_email.text and self.password.text and self.to_email.text and self.subject.text:
