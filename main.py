@@ -16,8 +16,6 @@ from email.mime.text import MIMEText
 
 import sqlite
 
-Window.size = (1080, 2340)
-
 
 class EmailsenderApp(App):
     button_color = (0, 1, .8, .8)
