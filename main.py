@@ -362,7 +362,7 @@ class EmailsenderApp(App):
                 try:
                     mgs = MIMEMultipart()
                     mgs['From'] = FROM_E_MAIL
-                    mgs['To'] = TO_E_MAIL, FROM_E_MAIL
+                    mgs['To'] = ', '.join([TO_E_MAIL, FROM_E_MAIL])
                     mgs['Subject'] = SUBJECT
                     body = f'Добрый день!\n' \
                            f'\n' \
