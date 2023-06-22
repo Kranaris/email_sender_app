@@ -5,6 +5,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
+from kivy.uix.popup import Popup
 
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.core.window import Window
@@ -22,6 +23,42 @@ class EmailsenderApp(App):
     text_color = '#00FFCE'
     font_size = 50
 
+    set_error = 'Заполни все поля!'
+    set_done = 'Изменения сохранены!'
+    send_error = 'Ошибка отправления!\n\n' \
+                 'Проверьте настройки!'
+
+    def show_popup(self, message):
+        popup = Popup(title="ОШИБКА",
+                      title_size=self.font_size,
+                      title_color=self.text_color,
+                      separator_color=self.text_color,
+                      title_align='center',
+                      size_hint=(.8, .8),
+                      auto_dismiss=False)
+
+        layout = BoxLayout(orientation='vertical')
+
+        label = Label(text=message,
+                      font_size=self.font_size,
+                      color=self.text_color
+                      )
+        layout.add_widget(label)
+
+        def dismiss_popup(instance):
+            popup.dismiss()
+
+        ok_button = Button(text="ОК",
+                           background_color=self.button_color,
+                           font_size=self.font_size,
+                           size_hint=(1, 0.3),
+                           on_release=dismiss_popup)
+
+        layout.add_widget(ok_button)
+        popup.content = layout
+
+        popup.open()
+
     def build(self):
         sqlite.db_connect()
 
@@ -36,10 +73,7 @@ class EmailsenderApp(App):
         screen2 = Screen(name="settings")
         screen3 = Screen(name="done")
         screen4 = Screen(name="data")
-        screen5 = Screen(name="set_error")
-        screen6 = Screen(name="set_done")
-        screen7 = Screen(name="send_error")
-        screen8 = Screen(name="history")
+        screen5 = Screen(name="history")
 
         bl_main = BoxLayout(orientation='vertical',
                             padding=[50, 10],
@@ -204,37 +238,6 @@ class EmailsenderApp(App):
                                   background_color=self.button_color,
                                   bold=True))
 
-        bl_set_error = BoxLayout(orientation='vertical')
-        bl_set_error.add_widget(Label(text='Заполните поля!',
-                                      font_size=self.font_size,
-                                      color=self.text_color))
-        bl_set_error.add_widget(Button(text='ОК',
-                                       font_size=self.font_size,
-                                       on_press=self.to_settings,
-                                       background_color=self.button_color,
-                                       bold=True))
-
-        bl_set_done = BoxLayout(orientation='vertical')
-        bl_set_done.add_widget(Label(text='Изменения сохранены!',
-                                     font_size=self.font_size,
-                                     color=self.text_color))
-        bl_set_done.add_widget(Button(text='ОК',
-                                      font_size=self.font_size,
-                                      on_press=self.to_main,
-                                      background_color=self.button_color,
-                                      bold=True))
-
-        bl_send_error = BoxLayout(orientation='vertical')
-        bl_send_error.add_widget(Label(text='Ошибка отправления!\n\n'
-                                            'Проверьте настройки!',
-                                       font_size=self.font_size,
-                                       color=self.text_color))
-        bl_send_error.add_widget(Button(text='ОК',
-                                        font_size=self.font_size,
-                                        on_press=self.to_settings,
-                                        background_color=self.button_color,
-                                        bold=True))
-
         bl_history = BoxLayout(orientation='vertical',
                                padding=[30, 20],
                                spacing=20)
@@ -255,8 +258,8 @@ class EmailsenderApp(App):
         self.history_grid.bind(minimum_height=self.history_grid.setter('height'))
         for i in sqlite.get_all_data():
             self.label_history_data = Label(text=str(i[1]),
-                                       font_size=self.font_size,
-                                       color=self.text_color)
+                                            font_size=self.font_size,
+                                            color=self.text_color)
             self.history_grid.add_widget(self.label_history_data)
 
             self.label_history_cw = Label(text=str(i[2]),
@@ -283,19 +286,13 @@ class EmailsenderApp(App):
         screen2.add_widget(bl_settings)
         screen3.add_widget(bl_done)
         screen4.add_widget(bl_data)
-        screen5.add_widget(bl_set_error)
-        screen6.add_widget(bl_set_done)
-        screen7.add_widget(bl_send_error)
-        screen8.add_widget(bl_history)
+        screen5.add_widget(bl_history)
 
         self.sm.add_widget(screen1)
         self.sm.add_widget(screen2)
         self.sm.add_widget(screen3)
         self.sm.add_widget(screen4)
         self.sm.add_widget(screen5)
-        self.sm.add_widget(screen6)
-        self.sm.add_widget(screen7)
-        self.sm.add_widget(screen8)
         self.sm.current = 'main'
         return self.sm
 
@@ -313,11 +310,11 @@ class EmailsenderApp(App):
                     config.write(f"PASS = {self.password.text}\n")
                     config.write(f"TO_E_MAIL = {self.to_email.text}\n")
                     config.write(f"SUBJECT = {self.subject.text}\n")
-                self.to_set_done(instance)
+                self.show_popup(self.set_done)
             except:
-                self.to_set_error(instance)
+                self.show_popup(self.set_error)
         else:
-            self.to_set_error(instance)
+            self.show_popup(self.set_error)
 
     def cw_min(self, instance):
         self.cold_water.text = str(int(self.cold_water.text) - 1)
@@ -342,15 +339,6 @@ class EmailsenderApp(App):
 
     def to_data(self, instance):
         self.sm.current = 'data'
-
-    def to_set_error(self, instance):
-        self.sm.current = 'set_error'
-
-    def to_set_done(self, instance):
-        self.sm.current = 'set_done'
-
-    def to_send_error(self, instance):
-        self.sm.current = 'send_error'
 
     def to_history(self, instance):
         self.sm.current = 'history'
@@ -390,11 +378,11 @@ class EmailsenderApp(App):
                     self.to_done(instance)
                     sqlite.create_new_data(self.date.text, self.cold_water.text, self.hot_water.text)
                 except:
-                    self.to_send_error(instance)
+                    self.show_popup(self.send_error)
             else:
                 self.to_data(instance)
         else:
-            self.to_set_error(instance)
+            self.show_popup(self.set_error)
 
 
 if __name__ == "__main__":
