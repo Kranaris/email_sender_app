@@ -21,15 +21,17 @@ import sqlite
 class EmailsenderApp(App):
     button_color = (0, 1, .8, .8)
     text_color = '#00FFCE'
-    font_size = 50
+    font_size = 45
 
     set_error = 'Заполни все поля!'
     set_done = 'Изменения сохранены!'
     send_error = 'Ошибка отправления!\n\n' \
                  'Проверьте настройки!'
+    data_error = 'Сначала введи\n' \
+                 'показания приборов!'
 
     def show_popup(self, message, go_to=None):
-        popup = Popup(title="ОШИБКА",
+        popup = Popup(title="ВНИМАНИЕ",
                       title_size=self.font_size,
                       title_color=self.text_color,
                       separator_color=self.text_color,
@@ -74,14 +76,32 @@ class EmailsenderApp(App):
         screen1 = Screen(name="main")
         screen2 = Screen(name="settings")
         screen3 = Screen(name="done")
-        screen4 = Screen(name="data")
-        screen5 = Screen(name="history")
+        screen4 = Screen(name="history")
 
         bl_main = BoxLayout(orientation='vertical',
-                            padding=[50, 10],
+                            padding=[10, 10],
                             spacing=50)
+
+        bl_profiles = BoxLayout(orientation='horizontal',
+                                padding=[10, 10],
+                                spacing=10)
+
+        bl_profiles.add_widget(Button(text='P1',
+                                      background_color=self.button_color,
+                                      font_size=self.font_size,
+                                      size_hint=[.2, 1],
+                                      on_press=self.cw_min))
+
+        bl_profiles.add_widget(Button(text='P2',
+                                      background_color=self.button_color,
+                                      font_size=self.font_size,
+                                      size_hint=[.2, 1],
+                                      on_press=self.cw_min))
+
+        bl_main.add_widget(bl_profiles)
+
         bl_main.add_widget(Label(text="Ввод показаний",
-                                 font_size=80,
+                                 font_size=60,
                                  color=self.text_color))
 
         gl1 = GridLayout(cols=2,
@@ -168,6 +188,16 @@ class EmailsenderApp(App):
         bl_settings.add_widget(Label(text='Настройки',
                                      font_size=80,
                                      color='#00FFCE'))
+
+        gl05 = GridLayout(cols=2,
+                          padding=[30, 80])
+        gl05.add_widget(Label(text='Имя профиля',
+                              font_size=self.font_size,
+                              color=self.text_color))
+        self.profile_name = TextInput(multiline=False,
+                                      font_size=self.font_size)
+        gl05.add_widget(self.profile_name)
+        bl_settings.add_widget(gl05)
 
         gl1 = GridLayout(cols=2,
                          padding=[30, 80])
@@ -287,14 +317,12 @@ class EmailsenderApp(App):
         screen1.add_widget(bl_main)
         screen2.add_widget(bl_settings)
         screen3.add_widget(bl_done)
-        screen4.add_widget(bl_data)
-        screen5.add_widget(bl_history)
+        screen4.add_widget(bl_history)
 
         self.sm.add_widget(screen1)
         self.sm.add_widget(screen2)
         self.sm.add_widget(screen3)
         self.sm.add_widget(screen4)
-        self.sm.add_widget(screen5)
         self.sm.current = 'main'
         return self.sm
 
@@ -306,15 +334,12 @@ class EmailsenderApp(App):
 
     def write_config(self, instance):
         if self.from_email.text and self.password.text and self.to_email.text and self.subject.text:
-            try:
-                with open("config.txt", "w", encoding="utf-8") as config:
-                    config.write(f"FROM_E_MAIL = {self.from_email.text}\n")
-                    config.write(f"PASS = {self.password.text}\n")
-                    config.write(f"TO_E_MAIL = {self.to_email.text}\n")
-                    config.write(f"SUBJECT = {self.subject.text}\n")
-                self.show_popup(self.set_done)
-            except:
-                self.show_popup(self.set_error)
+            sqlite.create_new_new_profile(self.profile_name,
+                                          self.from_email.text,
+                                          self.password.text,
+                                          self.to_email.text,
+                                          self.subject.text)
+            self.show_popup(self.set_done)
         else:
             self.show_popup(self.set_error)
 
@@ -339,27 +364,18 @@ class EmailsenderApp(App):
     def to_done(self, instance):
         self.sm.current = 'done'
 
-    def to_data(self, instance):
-        self.sm.current = 'data'
-
     def to_history(self, instance):
         self.sm.current = 'history'
 
     def send_e_mail(self, instance):
-        try:
-            with open("config.txt", "r", encoding="utf-8") as config:
-                config = config.readlines()
-                FROM_E_MAIL = config[0][14:]
-                PASS = config[1][7:]
-                TO_E_MAIL = config[2][12:]
-                SUBJECT = config[3][10:]
-        except:
-            FROM_E_MAIL = None
-            PASS = None
-            TO_E_MAIL = None
-            SUBJECT = None
+        profile = "1"
+        profile = sqlite.get_profile(profile)
+        if profile:
+            FROM_E_MAIL = profile[2]
+            PASS = profile[3]
+            TO_E_MAIL = profile[4]
+            SUBJECT = profile[5]
 
-        if FROM_E_MAIL and TO_E_MAIL and PASS and SUBJECT:
             if self.date.text and self.hot_water.text and self.cold_water.text:
                 try:
                     mgs = MIMEMultipart()
@@ -382,7 +398,7 @@ class EmailsenderApp(App):
                 except:
                     self.show_popup(self.send_error)
             else:
-                self.to_data(instance)
+                self.show_popup(self.data_error)
         else:
             self.show_popup(self.send_error, self.to_settings)
 
