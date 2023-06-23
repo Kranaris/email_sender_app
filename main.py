@@ -28,7 +28,7 @@ class EmailsenderApp(App):
     send_error = 'Ошибка отправления!\n\n' \
                  'Проверьте настройки!'
 
-    def show_popup(self, message):
+    def show_popup(self, message, go_to=None):
         popup = Popup(title="ОШИБКА",
                       title_size=self.font_size,
                       title_color=self.text_color,
@@ -47,6 +47,8 @@ class EmailsenderApp(App):
 
         def dismiss_popup(instance):
             popup.dismiss()
+            if go_to:
+                go_to(instance)
 
         ok_button = Button(text="ОК",
                            background_color=self.button_color,
@@ -382,7 +384,7 @@ class EmailsenderApp(App):
             else:
                 self.to_data(instance)
         else:
-            self.show_popup(self.set_error)
+            self.show_popup(self.send_error, self.to_settings)
 
 
 if __name__ == "__main__":
