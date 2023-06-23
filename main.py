@@ -30,6 +30,8 @@ class EmailsenderApp(App):
     data_error = 'Сначала введи\n' \
                  'показания приборов!'
 
+    profile = 1
+
     def show_popup(self, message, go_to=None):
         popup = Popup(title="ВНИМАНИЕ",
                       title_size=self.font_size,
@@ -63,6 +65,22 @@ class EmailsenderApp(App):
 
         popup.open()
 
+    def set_profile_1(self, instance):
+        self.profile = 1
+        self.update_profile_buttons()
+
+    def set_profile_2(self, instance):
+        self.profile = 2
+        self.update_profile_buttons()
+
+    def update_profile_buttons(self):
+        if self.profile == 1:
+            self.btn_profile1.background_color = [0.2, 0.8, 0.2, 1]  # Изменяем цвет кнопки профиля 1
+            self.btn_profile2.background_color = self.button_color  # Восстанавливаем цвет кнопки профиля 2
+        elif self.profile == 2:
+            self.btn_profile1.background_color = self.button_color  # Восстанавливаем цвет кнопки профиля 1
+            self.btn_profile2.background_color = [0.2, 0.8, 0.2, 1]  # Изменяем цвет кнопки профиля 2
+
     def build(self):
         sqlite.db_connect()
 
@@ -86,19 +104,25 @@ class EmailsenderApp(App):
                                 padding=[10, 10],
                                 spacing=10)
 
-        bl_profiles.add_widget(Button(text='P1',
-                                      background_color=self.button_color,
-                                      font_size=self.font_size,
-                                      size_hint=[.2, 1],
-                                      on_press=self.cw_min))
+        self.btn_profile1 = Button(text='P1',
+                                   background_color=self.button_color,
+                                   font_size=self.font_size,
+                                   size_hint=[.2, 1],
+                                   on_press=self.set_profile_1)
 
-        bl_profiles.add_widget(Button(text='P2',
-                                      background_color=self.button_color,
-                                      font_size=self.font_size,
-                                      size_hint=[.2, 1],
-                                      on_press=self.cw_min))
+        self.btn_profile2 = Button(text='P2',
+                                   background_color=self.button_color,
+                                   font_size=self.font_size,
+                                   size_hint=[.2, 1],
+                                   on_press=self.set_profile_2)
+
+        bl_profiles.add_widget(self.btn_profile1)
+        bl_profiles.add_widget(self.btn_profile2)
 
         bl_main.add_widget(bl_profiles)
+
+        self.update_profile_buttons()
+
 
         bl_main.add_widget(Label(text="Ввод показаний",
                                  font_size=60,
@@ -334,7 +358,8 @@ class EmailsenderApp(App):
 
     def write_config(self, instance):
         if self.from_email.text and self.password.text and self.to_email.text and self.subject.text:
-            sqlite.create_new_new_profile(self.profile_name,
+            sqlite.create_new_profile(self.profile,
+                                          self.profile_name,
                                           self.from_email.text,
                                           self.password.text,
                                           self.to_email.text,
@@ -368,8 +393,7 @@ class EmailsenderApp(App):
         self.sm.current = 'history'
 
     def send_e_mail(self, instance):
-        profile = "1"
-        profile = sqlite.get_profile(profile)
+        profile = sqlite.get_profile(self.profile)
         if profile:
             FROM_E_MAIL = profile[2]
             PASS = profile[3]
