@@ -12,7 +12,7 @@ def db_connect() -> None:
         "CREATE TABLE IF NOT EXISTS history(id INTEGER PRIMARY KEY, date TEXT, CW TEXT, HW TEXT)")
 
     cur.execute(
-        "CREATE TABLE IF NOT EXISTS profiles(id INTEGER PRIMARY KEY, title TEXT, FROM_E_MAIL TEXT, PASS TEXT, TO_E_MAIL TEXT, SUBJECT TEXT)")
+        "CREATE TABLE IF NOT EXISTS profiles(id INTEGER PRIMARY KEY, title TEXT, FROM_E_MAIL TEXT, PASS PASS, TO_E_MAIL TEXT, SUBJECT TEXT)")
 
     db.commit()
 
