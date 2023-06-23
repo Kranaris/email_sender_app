@@ -21,7 +21,7 @@ import sqlite
 class EmailsenderApp(App):
     button_color = (0, 1, .8, .8)
     text_color = '#00FFCE'
-    font_size = 45
+    font_size = 50
 
     set_error = 'Заполни все поля!'
     set_done = 'Изменения сохранены!'
@@ -38,7 +38,7 @@ class EmailsenderApp(App):
                       title_color=self.text_color,
                       separator_color=self.text_color,
                       title_align='center',
-                      size_hint=(.8, .8),
+                      size_hint=(.8, .5),
                       auto_dismiss=False)
 
         layout = BoxLayout(orientation='vertical')
@@ -75,11 +75,19 @@ class EmailsenderApp(App):
 
     def update_profile_buttons(self):
         if self.profile == 1:
-            self.btn_profile1.background_color = [0.2, 0.8, 0.2, 1]  # Изменяем цвет кнопки профиля 1
-            self.btn_profile2.background_color = self.button_color  # Восстанавливаем цвет кнопки профиля 2
+            self.btn_profile1.background_color = [0.2, 0.8, 0.2, 1]
+            self.btn_profile2.background_color = self.button_color
         elif self.profile == 2:
-            self.btn_profile1.background_color = self.button_color  # Восстанавливаем цвет кнопки профиля 1
-            self.btn_profile2.background_color = [0.2, 0.8, 0.2, 1]  # Изменяем цвет кнопки профиля 2
+            self.btn_profile1.background_color = self.button_color
+            self.btn_profile2.background_color = [0.2, 0.8, 0.2, 1]
+
+    def get_title(self, profile):
+        data = sqlite.get_profile(profile)
+        if data:
+            title = data[1]
+        else:
+            title = f"P{profile}"
+        return title
 
     def build(self):
         sqlite.db_connect()
@@ -104,13 +112,13 @@ class EmailsenderApp(App):
                                 padding=[10, 10],
                                 spacing=10)
 
-        self.btn_profile1 = Button(text='P1',
+        self.btn_profile1 = Button(text=self.get_title(1),
                                    background_color=self.button_color,
                                    font_size=self.font_size,
                                    size_hint=[.2, 1],
                                    on_press=self.set_profile_1)
 
-        self.btn_profile2 = Button(text='P2',
+        self.btn_profile2 = Button(text=self.get_title(2),
                                    background_color=self.button_color,
                                    font_size=self.font_size,
                                    size_hint=[.2, 1],
@@ -122,7 +130,6 @@ class EmailsenderApp(App):
         bl_main.add_widget(bl_profiles)
 
         self.update_profile_buttons()
-
 
         bl_main.add_widget(Label(text="Ввод показаний",
                                  font_size=60,
@@ -136,7 +143,9 @@ class EmailsenderApp(App):
         self.date = TextInput(multiline=False,
                               text=f'{date}',
                               font_size=self.font_size,
-                              halign="center")
+                              halign="center",
+                              pos_hint={"center_x": .5, "center_y": .5},
+                              )
         gl1.add_widget(self.date)
         bl_main.add_widget(gl1)
         gl2 = GridLayout(cols=4,
@@ -156,6 +165,7 @@ class EmailsenderApp(App):
                                     text=str(self.get_data_history()[-2]),
                                     font_size=self.font_size,
                                     halign="center",
+                                    pos_hint={"center_x": .5, "center_y": .5},
                                     size_hint=[.3, 1])
         gl2.add_widget(self.cold_water)
 
@@ -179,6 +189,7 @@ class EmailsenderApp(App):
                                    text=str(self.get_data_history()[-1]),
                                    font_size=self.font_size,
                                    halign="center",
+                                   pos_hint={"center_x": .5, "center_y": .5},
                                    size_hint=[.3, 1])
         gl3.add_widget(self.hot_water)
         gl3.add_widget(Button(text='+',
@@ -312,7 +323,7 @@ class EmailsenderApp(App):
 
         self.history_grid = GridLayout(cols=3, spacing=50, size_hint_y=None)
         self.history_grid.bind(minimum_height=self.history_grid.setter('height'))
-        for i in sqlite.get_all_data():
+        for i in sqlite.get_all_data(self.profile):
             self.label_history_data = Label(text=str(i[1]),
                                             font_size=self.font_size,
                                             color=self.text_color)
@@ -351,19 +362,19 @@ class EmailsenderApp(App):
         return self.sm
 
     def get_data_history(self):
-        data = sqlite.get_all_data()
+        data = sqlite.get_all_data(self.profile)
         if data:
             return data[-1]
         return [0, 0]
 
     def write_config(self, instance):
-        if self.from_email.text and self.password.text and self.to_email.text and self.subject.text:
+        if self.profile_name.text and self.from_email.text and self.password.text and self.to_email.text and self.subject.text:
             sqlite.create_new_profile(self.profile,
-                                          self.profile_name,
-                                          self.from_email.text,
-                                          self.password.text,
-                                          self.to_email.text,
-                                          self.subject.text)
+                                      self.profile_name.text,
+                                      self.from_email.text,
+                                      self.password.text,
+                                      self.to_email.text,
+                                      self.subject.text)
             self.show_popup(self.set_done)
         else:
             self.show_popup(self.set_error)
@@ -418,7 +429,7 @@ class EmailsenderApp(App):
                     smtpObj.send_message(mgs)
                     smtpObj.quit()
                     self.to_done(instance)
-                    sqlite.create_new_data(self.date.text, self.cold_water.text, self.hot_water.text)
+                    sqlite.create_new_data(self.profile, self.date.text, self.cold_water.text, self.hot_water.text)
                 except:
                     self.show_popup(self.send_error)
             else:
