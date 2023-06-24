@@ -310,6 +310,7 @@ class EmailsenderApp(App):
         bl_history = BoxLayout(orientation='vertical',
                                padding=[30, 20],
                                spacing=20)
+
         gl_hostory = GridLayout(cols=3, spacing=50, size_hint_y=None)
 
         gl_hostory.add_widget(Label(text='Дата',
@@ -321,12 +322,10 @@ class EmailsenderApp(App):
         gl_hostory.add_widget(Label(text='ГВС',
                                     font_size=self.font_size,
                                     color=self.text_color))
+
         bl_history.add_widget(gl_hostory)
-
-        self.history_grid = self.refresh_history(instance=None)
-
         sv_history = ScrollView()
-        sv_history.add_widget(self.history_grid)
+        sv_history.add_widget(self.refresh_history(instance=None))
         bl_history.add_widget(sv_history)
         bl_history.add_widget(Button(text='Назад',
                                      font_size=self.font_size,
@@ -360,6 +359,19 @@ class EmailsenderApp(App):
         sv_history = ScrollView()
         sv_history.add_widget(history_grid)
         bl_history = BoxLayout(orientation='vertical')
+
+        gl_hostory = GridLayout(cols=3, spacing=50, size_hint_y=None)
+        gl_hostory.add_widget(Label(text='Дата',
+                                    font_size=self.font_size,
+                                    color=self.text_color))
+        gl_hostory.add_widget(Label(text='ХВС',
+                                    font_size=self.font_size,
+                                    color=self.text_color))
+        gl_hostory.add_widget(Label(text='ГВС',
+                                    font_size=self.font_size,
+                                    color=self.text_color))
+
+        bl_history.add_widget(gl_hostory)
         bl_history.add_widget(sv_history)
         bl_history.add_widget(Button(text='Назад',
                                      font_size=self.font_size,
@@ -367,7 +379,9 @@ class EmailsenderApp(App):
                                      background_color=self.button_color,
                                      bold=True,
                                      size_hint=[1, .2]))
+
         self.screen4.add_widget(bl_history)
+
     def refresh_history(self, instance):
         history_grid = GridLayout(cols=3, spacing=50, size_hint_y=None)
         history_grid.bind(minimum_height=history_grid.setter('height'))
