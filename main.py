@@ -78,10 +78,14 @@ class EmailsenderApp(App):
             self.btn_profile1.background_color = [0.2, 0.8, 0.2, 1]
             self.btn_profile1.text = self.get_title(1)
             self.btn_profile2.background_color = self.button_color
+            self.hot_water.text = str(self.get_data_history(1)[-1])
+            self.cold_water.text = str(self.get_data_history(1)[-2])
         elif self.profile == 2:
             self.btn_profile1.background_color = self.button_color
             self.btn_profile2.text = self.get_title(2)
             self.btn_profile2.background_color = [0.2, 0.8, 0.2, 1]
+            self.hot_water.text = str(self.get_data_history(2)[-1])
+            self.cold_water.text = str(self.get_data_history(2)[-2])
 
     def get_title(self, profile):
         data = sqlite.get_profile(profile)
@@ -130,8 +134,6 @@ class EmailsenderApp(App):
         bl_profiles.add_widget(self.btn_profile2)
 
         bl_main.add_widget(bl_profiles)
-
-        self.update_profile_buttons()
 
         bl_main.add_widget(Label(text="Ввод показаний",
                                  font_size=60,
