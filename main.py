@@ -106,7 +106,7 @@ class EmailsenderApp(App):
 
         bl_main = BoxLayout(orientation='vertical',
                             padding=[10, 10],
-                            spacing=50)
+                            spacing=10)
 
         bl_profiles = BoxLayout(orientation='horizontal',
                                 padding=[10, 10],
@@ -115,13 +115,13 @@ class EmailsenderApp(App):
         self.btn_profile1 = Button(text=self.get_title(1),
                                    background_color=self.button_color,
                                    font_size=self.font_size,
-                                   size_hint=[.2, 1],
+                                   size_hint=[.1, 1],
                                    on_press=self.set_profile_1)
 
         self.btn_profile2 = Button(text=self.get_title(2),
                                    background_color=self.button_color,
                                    font_size=self.font_size,
-                                   size_hint=[.2, 1],
+                                   size_hint=[.1, 1],
                                    on_press=self.set_profile_2)
 
         bl_profiles.add_widget(self.btn_profile1)
@@ -136,7 +136,7 @@ class EmailsenderApp(App):
                                  color=self.text_color))
 
         gl1 = GridLayout(cols=2,
-                         padding=[50, 100])
+                         padding=[50,80])
         gl1.add_widget(Label(text='Дата показаний',
                              font_size=self.font_size,
                              color=self.text_color))
@@ -149,7 +149,7 @@ class EmailsenderApp(App):
         gl1.add_widget(self.date)
         bl_main.add_widget(gl1)
         gl2 = GridLayout(cols=4,
-                         padding=[50, 100])
+                         padding=[50, 80])
         bl_main.add_widget(gl2)
         gl2.add_widget(Label(text='ХВС',
                              font_size=self.font_size,
@@ -162,7 +162,7 @@ class EmailsenderApp(App):
                               on_press=self.cw_min))
 
         self.cold_water = TextInput(multiline=False,
-                                    text=str(self.get_data_history()[-2]),
+                                    text=str(self.get_data_history(self.profile)[-2]),
                                     font_size=self.font_size,
                                     halign="center",
                                     pos_hint={"center_x": .5, "center_y": .5},
@@ -176,7 +176,7 @@ class EmailsenderApp(App):
                               on_press=self.cw_plus))
 
         gl3 = GridLayout(cols=4,
-                         padding=[50, 100])
+                         padding=[50, 80])
         gl3.add_widget(Label(text='ГВС',
                              font_size=self.font_size,
                              color=self.text_color))
@@ -186,7 +186,7 @@ class EmailsenderApp(App):
                               size_hint=[.2, 1],
                               on_press=self.hw_min))
         self.hot_water = TextInput(multiline=False,
-                                   text=str(self.get_data_history()[-1]),
+                                   text=str(self.get_data_history(self.profile)[-1]),
                                    font_size=self.font_size,
                                    halign="center",
                                    pos_hint={"center_x": .5, "center_y": .5},
@@ -321,23 +321,7 @@ class EmailsenderApp(App):
                                     color=self.text_color))
         bl_history.add_widget(gl_hostory)
 
-        self.history_grid = GridLayout(cols=3, spacing=50, size_hint_y=None)
-        self.history_grid.bind(minimum_height=self.history_grid.setter('height'))
-        for i in sqlite.get_all_data(self.profile):
-            self.label_history_data = Label(text=str(i[1]),
-                                            font_size=self.font_size,
-                                            color=self.text_color)
-            self.history_grid.add_widget(self.label_history_data)
-
-            self.label_history_cw = Label(text=str(i[2]),
-                                          font_size=self.font_size,
-                                          color=self.text_color)
-            self.history_grid.add_widget(self.label_history_cw)
-
-            self.label_history_hw = Label(text=str(i[3]),
-                                          font_size=self.font_size,
-                                          color=self.text_color)
-            self.history_grid.add_widget(self.label_history_hw)
+        self.history_grid = self.refresh_history(instance=None)
 
         sv_history = ScrollView()
         sv_history.add_widget(self.history_grid)
@@ -361,12 +345,31 @@ class EmailsenderApp(App):
         self.sm.current = 'main'
         return self.sm
 
-    def get_data_history(self):
-        data = sqlite.get_all_data(self.profile)
+    def get_data_history(self, profile):
+        data = sqlite.get_all_data(profile)
         if data:
             return data[-1]
         return [0, 0]
 
+    def refresh_history(self, instance):
+        self.history_grid = GridLayout(cols=3, spacing=50, size_hint_y=None)
+        self.history_grid.bind(minimum_height=self.history_grid.setter('height'))
+        for i in sqlite.get_all_data(self.profile):
+            self.label_history_data = Label(text=str(i[1]),
+                                            font_size=self.font_size,
+                                            color=self.text_color)
+            self.history_grid.add_widget(self.label_history_data)
+
+            self.label_history_cw = Label(text=str(i[2]),
+                                          font_size=self.font_size,
+                                          color=self.text_color)
+            self.history_grid.add_widget(self.label_history_cw)
+
+            self.label_history_hw = Label(text=str(i[3]),
+                                          font_size=self.font_size,
+                                          color=self.text_color)
+            self.history_grid.add_widget(self.label_history_hw)
+        return self.history_grid
     def write_config(self, instance):
         if self.profile_name.text and self.from_email.text and self.password.text and self.to_email.text and self.subject.text:
             sqlite.create_new_profile(self.profile,
@@ -397,10 +400,12 @@ class EmailsenderApp(App):
     def to_main(self, instance):
         self.sm.current = 'main'
 
+
     def to_done(self, instance):
         self.sm.current = 'done'
 
     def to_history(self, instance):
+        self.history_grid = self.refresh_history(instance=None)
         self.sm.current = 'history'
 
     def send_e_mail(self, instance):
