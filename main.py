@@ -76,9 +76,11 @@ class EmailsenderApp(App):
     def update_profile_buttons(self):
         if self.profile == 1:
             self.btn_profile1.background_color = [0.2, 0.8, 0.2, 1]
+            self.btn_profile1.text = self.get_title(1)
             self.btn_profile2.background_color = self.button_color
         elif self.profile == 2:
             self.btn_profile1.background_color = self.button_color
+            self.btn_profile2.text = self.get_title(2)
             self.btn_profile2.background_color = [0.2, 0.8, 0.2, 1]
 
     def get_title(self, profile):
@@ -102,7 +104,7 @@ class EmailsenderApp(App):
         screen1 = Screen(name="main")
         screen2 = Screen(name="settings")
         screen3 = Screen(name="done")
-        screen4 = Screen(name="history")
+        self.screen4 = Screen(name="history")
 
         bl_main = BoxLayout(orientation='vertical',
                             padding=[10, 10],
@@ -336,12 +338,12 @@ class EmailsenderApp(App):
         screen1.add_widget(bl_main)
         screen2.add_widget(bl_settings)
         screen3.add_widget(bl_done)
-        screen4.add_widget(bl_history)
+        self.screen4.add_widget(bl_history)
 
         self.sm.add_widget(screen1)
         self.sm.add_widget(screen2)
         self.sm.add_widget(screen3)
-        self.sm.add_widget(screen4)
+        self.sm.add_widget(self.screen4)
         self.sm.current = 'main'
         return self.sm
 
@@ -351,25 +353,40 @@ class EmailsenderApp(App):
             return data[-1]
         return [0, 0]
 
+    def update_history_screen(self):
+        self.screen4.clear_widgets()
+
+        history_grid = self.refresh_history(None)
+        sv_history = ScrollView()
+        sv_history.add_widget(history_grid)
+        bl_history = BoxLayout(orientation='vertical')
+        bl_history.add_widget(sv_history)
+        bl_history.add_widget(Button(text='Назад',
+                                     font_size=self.font_size,
+                                     on_press=self.to_main,
+                                     background_color=self.button_color,
+                                     bold=True,
+                                     size_hint=[1, .2]))
+        self.screen4.add_widget(bl_history)
     def refresh_history(self, instance):
-        self.history_grid = GridLayout(cols=3, spacing=50, size_hint_y=None)
-        self.history_grid.bind(minimum_height=self.history_grid.setter('height'))
+        history_grid = GridLayout(cols=3, spacing=50, size_hint_y=None)
+        history_grid.bind(minimum_height=history_grid.setter('height'))
         for i in sqlite.get_all_data(self.profile):
-            self.label_history_data = Label(text=str(i[1]),
-                                            font_size=self.font_size,
-                                            color=self.text_color)
-            self.history_grid.add_widget(self.label_history_data)
+            label_history_data = Label(text=str(i[1]),
+                                       font_size=self.font_size,
+                                       color=self.text_color)
+            history_grid.add_widget(label_history_data)
 
-            self.label_history_cw = Label(text=str(i[2]),
-                                          font_size=self.font_size,
-                                          color=self.text_color)
-            self.history_grid.add_widget(self.label_history_cw)
+            label_history_cw = Label(text=str(i[2]),
+                                     font_size=self.font_size,
+                                     color=self.text_color)
+            history_grid.add_widget(label_history_cw)
 
-            self.label_history_hw = Label(text=str(i[3]),
-                                          font_size=self.font_size,
-                                          color=self.text_color)
-            self.history_grid.add_widget(self.label_history_hw)
-        return self.history_grid
+            label_history_hw = Label(text=str(i[3]),
+                                     font_size=self.font_size,
+                                     color=self.text_color)
+            history_grid.add_widget(label_history_hw)
+        return history_grid
     def write_config(self, instance):
         if self.profile_name.text and self.from_email.text and self.password.text and self.to_email.text and self.subject.text:
             sqlite.create_new_profile(self.profile,
@@ -398,6 +415,7 @@ class EmailsenderApp(App):
         self.sm.current = 'settings'
 
     def to_main(self, instance):
+        self.update_profile_buttons()
         self.sm.current = 'main'
 
 
@@ -405,7 +423,7 @@ class EmailsenderApp(App):
         self.sm.current = 'done'
 
     def to_history(self, instance):
-        self.history_grid = self.refresh_history(instance=None)
+        self.update_history_screen()
         self.sm.current = 'history'
 
     def send_e_mail(self, instance):
